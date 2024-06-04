@@ -1,0 +1,110 @@
+MAN MINILIBX
+
+tiny graphic library which allows you to do basic things for rendering something in screen without any knoledge in X window and cocoa
+x-window : network-oriented graphical system for unix (exemple for connexting remote desktops)
+cocoa : same but for macOS
+
+
+intro :
+minilibx on linux can use codam provided zip and reauire xorg x11 wlib (u have to install)
+
+for object
+%.o: %.c
+	$(CC) -Wall -Wextra -Werror -I/usr/include -Imlx_linux -O3 -c $< -o $@
+
+
+$(NAME): $(OBJ)
+	$(CC) $(OBJ) -Lmlx_linux -lmlx_Linux -L/usr/lib -Imlx_linux -lXext -lX11 -lm -lz -o $(NAME)
+
+getting a sceen on 
+
+init mlx and window :
+#include <mlx.h>
+
+int	main(void)
+{
+	void	*mlx;
+	void	*mlx_win;
+
+	mlx = mlx_init(); // initialization of mlx
+	mlx_win = mlx_new_window(mlx, 1920, 1080, "Hello world!"); //initialization of tiny widow ()
+	mlx_loop(mlx); // initialization rendering window
+}
+
+put some pixel on widows :
+#include <mlx.h>
+
+typedef struct	s_data {
+	void	*img; // pointer with image
+	char	*addr; / address of image
+	int		bits_per_pixel; // bbp
+	int		line_length; // lengh of the line
+	int		endian; // byte order choosen 
+}				t_data;
+
+int	main(void)
+{
+	void	*mlx;
+	t_data	img;
+
+	mlx = mlx_init();
+	img.img = mlx_new_image(mlx, 1920, 1080); // initialization(creation) image
+
+	/*
+	** After creating an image, we can call `mlx_get_data_addr`, we pass
+	** `bits_per_pixel`, `line_length`, and `endian` by reference. These will
+	** then be set accordingly for the *current* data address.
+	*/
+	img.addr = mlx_get_data_addr(img.img, &img.bits_per_pixel, &img.line_length,
+								&img.endian);
+}
+now we got image adress but no pixel in it the bytes are not aligned wich mean line-lenght differs frome the actual window width
+ALWAYS calculate the memory offset using line_lengh and mlx_get_data_addr
+calculate :
+
+int offset = (y * line_length + x * (bits_per_pixel / 8));
+
+we know now where to write the pixel write fonction like mlx_put but faster
+
+typedef struct	s_data {
+	void	*img;
+	char	*addr;
+	int		bits_per_pixel;
+	int		line_length;
+	int		endian;
+}				t_data;
+
+void	my_mlx_pixel_put(t_data *data, int x, int y, int color)
+{
+	char	*dst;
+
+	dst = data->addr + (y * data->line_length + x * (data->bits_per_pixel / 8));
+	*(unsigned int*)dst = color;
+}
+push image to a window
+
+#include <mlx.h>
+
+typedef struct	s_data {
+	void	*img;
+	char	*addr;
+	int		bits_per_pixel;
+	int		line_length;
+	int		endian;
+}				t_data;
+
+int	main(void)
+{
+	void	*mlx;
+	void	*mlx_win;
+	t_data	img;
+
+	mlx = mlx_init();
+	mlx_win = mlx_new_window(mlx, 1920, 1080, "Hello world!");
+	img.img = mlx_new_image(mlx, 1920, 1080);
+	img.addr = mlx_get_data_addr(img.img, &img.bits_per_pixel, &img.line_length,
+								&img.endian);
+	my_mlx_pixel_put(&img, 5, 5, 0x00FF0000); // put pixel at 5,5 position0x00FF0000=red
+	mlx_put_image_to_window(mlx, mlx_win, img.img, 0, 0);
+	mlx_loop(mlx);
+}

@@ -1,0 +1,8 @@
+https://www.sanfoundry.com/c-program-circular-doubly-linked-list/
+
+
+1 Choisir le premier élément du tableau
+2  Choisir le dernier élément du tableau
+3  Choisir un élément au hasard
+4 Choisir l'élément au milieu du tableau
+5 Trouver le pivot optimal en recherchant la médiane

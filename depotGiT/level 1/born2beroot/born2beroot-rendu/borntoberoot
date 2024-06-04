@@ -1,0 +1,185 @@
+
+hostname : endoliam42
+password LVM : Pat42pat56Rouille\
+password : PAss2Broo89t 
+
+etc/group = gerer les groupe
+sudo addgroup <groupname>
+sudo adduser <login>
+sudo adduser <user> <groupname>
+getent group groupname
+deluser <username>
+
+LVM (Logical volume Manager) =
+technologie de gestion de stockage pour OS linux gere de maniere dynamique les volumes logiques
+
+port SSH = interface de reseau permettant d etablir une conexion seccuriser entre deux systeme (client et serveur)
+utiliser pour se connecter a distance dans un systeme 
+(par default est dans le port 22 mais peut etre config)
+port = canal virtuel use for diriger un trafic reseau vers un service specifique sur un ordi
+
+sudo service ssh status 
+
+etc/ssh/ssh_config :
+dossier servant a configurer les parametres client ssh 
+(comment le client doit se comporter lorsqu il se connecte)
+ex :
+- param de connexion par default (nom user, port par default)
+- param ssh key
+- option de securite
+
+etc/ssh/sshd_config :
+fichier servant a config les param du serveur SSH (demon ssh)
+(comment le demon ssh doit gerer lels conexion au serveur)
+ex :
+-les ports sur lesquels le serveur dois ecouter
+-les cles d hote utiliser
+-les param d authentification
+- restriction d acces utilisateur / groupe specifique
+
+
+
+
+UFW = interface de gestion de pare-feu pour les systeme linux outils simplifier
+pour configurer des regles de pare-feu sans utiliser les commande iptables
+iptable = systeme de pare feu noyau de linux
+
+sudo ufw status (verbose, numbered)4
+
+
+
+
+touch etc/sudoers.d/sudo_config :
+fichier pour ajouter des regles supplementaire a la config sudo
+etc/sudoers :
+dossier utiliser specifier les regles et les permissions pour user et groupe
+
+mkdir var/log/sudo :
+pour les log sudo
+
+nano /etc/login.defs
+fichier permettant de configurer des param lier aux utilisateurs 
+ex :
+- durer de vie du mdp;
+- param expiration du comporte
+- param complexiter mdp
+- param echec connexion
+- param creation repertoire user
+- param de shadowpass
+- param environement user
+
+sudo apt install libpam-pwquality
+bibliotheque  qui fournit des fonctionalites de controle de qualiter des mdp
+complexiter, historique, exiration, force de cryptage
+PAM =(plugable authentification module)
+
+etc/pam.d/common-password
+fichier use for definir les regles de gestion de mdp
+
+minlen=10 ➤ The minimun characters a password must contain.
+
+ucredit=-1 ➤ The password at least have to contain a capital letter. We must write it with a - sign, as is how it knows that's refering to minumum caracters; if we put a + sign it will refer to maximum characters.
+
+dcredit=-1 ➤ The passworld at least have to containt a digit.
+
+lcredit=-1 ➤ The password at least have to contain a lowercase letter.
+
+maxrepeat=3 ➤ The password can not have the same character repited three contiusly times.
+
+reject_username ➤ The password can not contain the username inside itself.
+
+difok=7 ➤ The password it have to containt at least seven diferent characters from the last password ussed.
+
+enforce_for_root ➤ We will implement this password policy to root.
+
+Script = sequence de commande mis dans un fichier qui quand est executer fait les fonctins affilier aux commandes mis en place
+
+architecture SO = architecture d'un systeme d'exploitation (conception globale du systeme) gestion des processus, gestion de la memoire, gestion des entree/sortie,gestion des fichiers
+
+pour afficher architecture en SO : 
+
+uname -a
+
+coeur physique du processseur (physical cores) = 
+independant 
+(afficher le nb de coeur physique du proc)
+commande pour afficher :
+
+-grep "physical id" /proc/cpuinfo | wc -l
+
+coeur logique du processeur (virtual cores) = 
+depend des coeurs physique
+(entiter virtuel qui peut etre traiter par le coeur physique)
+commande pour afficher :
+
+-grep processor /proc/cpuinfo | wc -l
+
+RAM (Random Acces Memory) =
+type de memoire utiliser pour stocker temporairement des donner/programme en cours d'utilisation
+commande pour afficher :
+
+free (--mega pour megaoctets)
+
+afficher 3 element de la ligne (Mem:) (RAM utiliser) (pour RAM total {print $3}): 
+
+-free --mega | awk '$1 == "Mem:" {print $3}' 
+
+calculer le % RAM utiliser :
+
+-free --mega | awk '$1 == "Mem:" {printf("(%.2f%%)\n", $3/$2*100)}'
+
+memoire de stockage (disk memory) =
+disque de stockage donnees (disque dur, disque SSD).
+
+afficher memoire utiliser:
+-df -m | grep "/dev/" | grep -v "/boot" | awk '{memory_use += $3} END {print memory_use}'
+
+afficher memoire total en Gb:
+-df -m | grep "/dev" | grep -v "/boot" | awk '{memory_result += $2} END {printf ("%.0fGb\n"), memory_use\1024}
+
+pourcentage de memoire utiliser :
+-df -m |grep "/dev/" |grep "/boot" | awk '{use += $3}{total += $2} END {printf("%d%%\n"), use/total*100}'
+
+CPU (Central Processing Unit) =
+processeur c'est le cerveau de l'ordinateur (responsable de l'execution des instructions et du traitement de donnees)
+
+commande principal d'affichage du CPU en pourcentage:(-uptime |awk '{TOTAL = $9} {print TOTAL}' | tr "," -s)
+
+-vmstat | til -1 | awk '{print $15}'
+
+Last reboot = 
+derniere fois que le systeme a ete redemarrer
+
+aficher :( -uptime -s)
+
+-who -b | awk '$1 == "system" {print $3 " " $4}'
+
+LVM(Logical Volume Manager) active =
+est ce que la LVM est active ?
+
+afficher :
+
+-if [ $(lsblk | grep "lvm" | wc -l) -gt 0 ]; then echo yes; else echo no; fi
+
+nombre d'utilisateur :
+
+-users |wc -w
+
+Adresse IP et MAC:
+
+-ip link | grep "link/ether" | awk '{print $2}'
+
+nombre de commade executer par sudo :
+
+-journalctl _COMM=sudo -q | grep COMMAND | wc -l
+
+
+differnce entre rocky et debian :
+
+- Rocky = distribution de linux communeautaire alternative gratuite a centOS qui est passer d'une version binaire gratuite (red hat) centOs stream opensource stable pour utilisateur/entreprise.
+
+-Debian = distribution de linux +ancienne et +connu et utiliser dans uns variete de domaines.
+
+gestion des paquets: -apt 
+
+lien tuto https://github.com/gemartin99/Born2beroot-Tutorial
